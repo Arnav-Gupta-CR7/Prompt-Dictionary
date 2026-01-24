@@ -1,0 +1,12 @@
+.var {
+  color: hsl(var(--hl-fg));
+  background-color: hsl(var(--hl-bg));
+  padding: 0 6px;
+  border-radius: 4px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+
+
+
