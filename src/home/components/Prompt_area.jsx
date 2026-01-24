@@ -1,6 +1,6 @@
 import '../var.css'
 import { useEffect, useRef, useState } from "react";
-import Pbtn from './perplex'
+import Pbtn from '../experiment/perplex'
 
 export default function Prompt_area() {
   const editorRef = useRef(null);
@@ -166,16 +166,16 @@ export default function Prompt_area() {
           </div >
             <div className='flex gap-x-2'>
               <button className='btn ' onClick={()=>{copyAndOpen('chatgpt')}}>
-                <img src="chatgpt.svg" className='h-5'/>
+                <img src="/chatgpt.svg" className='h-5'/>
               </button>
               <button className='btn ' onClick={()=>{copyAndOpen('gemini')}}>
-                <img src="gemini.svg" className='h-5'/>
+                <img src="/gemini.svg" className='h-5'/>
               </button>
               <button className='btn ' onClick={()=>{copyAndOpen('grok')}}>
-                <img src="grok.svg" className='h-5'/>
+                <img src="/grok.svg" className='h-5'/>
               </button>
               <button className='btn ' onClick={()=>{copyAndOpen('claude')}}>
-                <img src="claude.svg" className='h-5'/>
+                <img src="/claude.svg" className='h-5'/>
               </button>
             </div>
           </div>
