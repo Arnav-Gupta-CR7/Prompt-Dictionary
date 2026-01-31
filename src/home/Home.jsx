@@ -6,6 +6,7 @@ export default function Home() {
     return (
         <>
             <Home_nav/>
+
             <div>
                 <Outlet/>
             </div>

@@ -1,10 +1,17 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom"
 import Home_login_exp from "./experiment/Home_login_exp";
 import Sidebar_items from "./Sidebar_items";
+import { supabase } from "../lib/supabase"; // adjust path if needed
+
 
 export default function Home_nav() {
 
     const [isForest, setIsForest] = useState(false);
+    const [query, setQuery] = useState("")
+    const [suggestions, setSuggestions] = useState([])
+    const navigate = useNavigate()
+
     
     useEffect(() => {
         document.documentElement.setAttribute(
@@ -12,6 +19,32 @@ export default function Home_nav() {
         isForest ? "forest" : "cupcake"
         );
     }, [isForest]);
+
+
+    useEffect(() => {
+        if (!query.trim()) {
+            setSuggestions([])
+            return
+        }
+
+        const timer = setTimeout(async () => {
+            const { data, error } = await supabase
+            .rpc("autocomplete_search", { q: query })
+
+            if (error) {
+            console.error(error)
+            setSuggestions([])
+            } else {
+            setSuggestions(data || [])
+            }
+
+            console.log("autocomplete_search:", data)
+        }, 300)
+
+        return () => clearTimeout(timer)
+    }, [query])
+
+
 
 
 
@@ -63,8 +96,55 @@ export default function Home_nav() {
                         <path d="m21 21-4.3-4.3"></path>
                         </g>
                     </svg>
-                    <input type="search" required placeholder="Search" />
+                    <input
+                        type="search"
+                        required
+                        placeholder="Search"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                    />
+
                 </label>
+
+
+                {/* DROPDOWN */}
+                {suggestions.length > 0 && (
+                    <ul className="absolute z-50 mt-2 w-xl bg-base-100 border border-base-300 rounded-lg shadow-md max-h-72 overflow-y-auto">
+                    {suggestions.map((item) => (
+                        <li
+                        key={item.entity_id}
+                        className="px-4 py-2 hover:bg-base-200 cursor-pointer flex justify-between items-center"
+                        onClick={() => {
+                            setSuggestions([])
+                            setQuery("")
+
+                            if (item.entity_type === "category") {
+                            navigate(`/category/${item.category_slug}`)
+                            } else {
+                            navigate(`/prompt/${item.entity_id}`)
+                            }
+                        }}
+                        >
+                        <span className="text-sm truncate">
+                            {item.title}
+                        </span>
+
+                        <span
+                            className={`badge badge-sm ${
+                            item.entity_type === "category"
+                                ? "badge-secondary"
+                                : "badge-primary"
+                            }`}
+                        >
+                            {item.subtitle}
+                        </span>
+                        </li>
+                    ))}
+                    </ul>
+                )}
+
+
+
             </div>
 
 
