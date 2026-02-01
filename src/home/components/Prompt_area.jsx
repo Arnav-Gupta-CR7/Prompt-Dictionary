@@ -1,27 +1,16 @@
-import '../var.css'
+import "../var.css"
 import { useEffect, useRef, useState } from "react"
 import { useParams } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux"
 import { fetchPromptById } from "../../store/promptsSlice"
-import PromptActions from './PromptActions'
+import PromptActions from "./PromptActions"
+import { FiCopy } from "react-icons/fi"
 
 const PROMPT_TYPE_BADGE = {
-  text_prompt: {
-    label: "Text Prompt",
-    class: "badge-info"
-  },
-  image_prompt: {
-    label: "Image Prompt",
-    class: "badge-secondary"
-  },
-  music_prompt: {
-    label: "Music Prompt",
-    class: "badge-success"
-  },
-  video_prompt: {
-    label: "Video Prompt",
-    class: "badge-warning"
-  }
+  text_prompt: { label: "Text Prompt", class: "badge-info" },
+  image_prompt: { label: "Image Prompt", class: "badge-secondary" },
+  music_prompt: { label: "Music Prompt", class: "badge-success" },
+  video_prompt: { label: "Video Prompt", class: "badge-warning" }
 }
 
 export default function Prompt_area() {
@@ -31,51 +20,52 @@ export default function Prompt_area() {
   /* ================= REFS ================= */
   const editorRef = useRef(null)
   const rawTextRef = useRef("")
-  const initializedRef = useRef(false)
 
   /* ================= REDUX ================= */
   const prompt = useSelector(state => state.prompts.byId[id])
+  const status = useSelector(state => state.prompts.statusById[id])
 
   /* ================= STATE ================= */
-  const [meta, setMeta] = useState(null)
   const [variables, setVariables] = useState({})
+  const [copied, setCopied] = useState(false)
+
+  /* ================= FETCH PROMPT ================= */
+  useEffect(() => {
+    if (!id) return
+
+    if (!prompt && status !== "loading") {
+      dispatch(fetchPromptById(id))
+    }
+  }, [id, prompt, status, dispatch])
 
   /* ================= ESCAPE HTML ================= */
-  const escapeHtml = (text) =>
+  const escapeHtml = text =>
     text
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
 
   /* ================= RENDER ================= */
-  const renderText = (text) => {
-  if (!editorRef.current) return
+  const renderText = text => {
+    if (!editorRef.current) return
 
-  // 1️⃣ Convert literal "\n" → real newline
-  const normalized = text.replace(/\\n/g, "\n")
+    const normalized = text.replace(/\\n/g, "\n")
+    const escaped = escapeHtml(normalized)
+    const withBreaks = escaped.replace(/\n/g, "<br>")
 
-  // 2️⃣ Escape HTML
-  const escaped = escapeHtml(normalized)
+    const highlighted = withBreaks.replace(
+      /&lt;&lt;([\s\S]*?)&gt;&gt;/g,
+      `<span class="var">&lt;&lt;$1&gt;&gt;</span>`
+    )
 
-  // 3️⃣ Convert newline → <br>
-  const withBreaks = escaped.replace(/\n/g, "<br>")
-
-  // 4️⃣ Highlight variables
-  const highlighted = withBreaks.replace(
-    /&lt;&lt;([\s\S]*?)&gt;&gt;/g,
-    `<span class="var">&lt;&lt;$1&gt;&gt;</span>`
-  )
-
-  editorRef.current.innerHTML = highlighted
-}
-
-
+    editorRef.current.innerHTML = highlighted
+  }
 
   /* ================= EXTRACT VARIABLES ================= */
-  const extractVariables = (text) => {
+  const extractVariables = text => {
     const matches = [...text.matchAll(/<<([\s\S]*?)>>/g)]
-
     const next = {}
+
     matches.forEach((m, i) => {
       next[`var_${i}`] = {
         label: m[1],
@@ -85,6 +75,17 @@ export default function Prompt_area() {
 
     setVariables(next)
   }
+
+  /* ================= INIT / RESET ON PROMPT CHANGE ================= */
+  useEffect(() => {
+    if (!prompt) return
+
+    const content = prompt.content || ""
+
+    rawTextRef.current = content
+    extractVariables(content)
+    renderText(content)
+  }, [prompt])
 
   /* ================= UPDATE VARIABLE ================= */
   const updateVariable = (id, value) => {
@@ -107,32 +108,6 @@ export default function Prompt_area() {
     })
   }
 
-  /* ================= FETCH PROMPT ================= */
-  useEffect(() => {
-    if (!prompt) {
-      dispatch(fetchPromptById(id))
-    }
-  }, [id, prompt, dispatch])
-
-  /* ================= INIT EDITOR (ONCE) ================= */
-  useEffect(() => {
-    if (!prompt || initializedRef.current) return
-
-    initializedRef.current = true
-
-    setMeta({
-      title: prompt.title,
-      description: prompt.description
-    })
-
-    const content = prompt.content || ""
-
-    rawTextRef.current = content
-    extractVariables(content)
-    renderText(content)
-
-  }, [prompt])
-
   /* ================= EDITOR INPUT ================= */
   const handleEditorInput = () => {
     const text = editorRef.current.innerText
@@ -153,7 +128,7 @@ export default function Prompt_area() {
   }
 
   /* ================= COPY & OPEN ================= */
-  const copyAndOpen = async (platform) => {
+  const copyAndOpen = async platform => {
     try {
       await navigator.clipboard.writeText(rawTextRef.current)
 
@@ -167,10 +142,9 @@ export default function Prompt_area() {
         suno: "https://suno.ai/"
       }
 
-      const url = urls[platform]
-      if (!url) return
-
-      window.open(url, "_blank")
+      if (urls[platform]) {
+        window.open(urls[platform], "_blank")
+      }
     } catch (err) {
       console.error(err)
       alert("Failed to copy prompt")
@@ -186,19 +160,36 @@ export default function Prompt_area() {
     )
   }
 
+  /* ================= COPY BUTTON ================= */
+  const copyPrompt = async () => {
+    try {
+      await navigator.clipboard.writeText(rawTextRef.current)
+      setCopied(true)
+
+      setTimeout(() => {
+        setCopied(false)
+      }, 1500)
+    } catch (err) {
+      console.error(err)
+      alert("Failed to copy prompt")
+    }
+  }
+
+
+
   /* ================= UI ================= */
   return (
     <div className="max-w-4xl mx-auto p-4 space-y-4">
 
       {/* TITLE + BADGE */}
       <div className="flex items-center gap-3 flex-wrap">
-        <h2 className="text-xl font-semibold">
-          {meta?.title}
-        </h2>
+        <h2 className="text-xl font-semibold">{prompt.title}</h2>
 
-        {prompt?.layout_key && (
+        {prompt.layout_key && (
           <span
-            className={`badge ${PROMPT_TYPE_BADGE[prompt.layout_key]?.class || "badge-ghost"}`}
+            className={`badge ${
+              PROMPT_TYPE_BADGE[prompt.layout_key]?.class || "badge-ghost"
+            }`}
           >
             {PROMPT_TYPE_BADGE[prompt.layout_key]?.label || "Prompt"}
           </span>
@@ -206,42 +197,63 @@ export default function Prompt_area() {
       </div>
 
       {/* DESCRIPTION */}
-      <p className="text-sm text-gray-500">
-        {meta?.description}
-      </p>
+      <p className="text-sm text-gray-500">{prompt.description}</p>
 
       {/* EDITOR */}
-      <div
-        ref={editorRef}
-        contentEditable
-        onInput={handleEditorInput}
-        spellCheck={false}
-        className="
-          min-h-35
-          p-4
-          border
-          rounded-md
-          font-mono
-          whitespace-pre-wrap
-          leading-8
-          w-full
-          max-w-5xl
-          focus:ring-1
-        "
-      />
+      <div className="relative">
+
+  {/* COPY BUTTON */}
+  <button
+    onClick={copyPrompt}
+    className="
+      absolute
+      top-2
+      right-2
+      btn
+      btn-xs
+      btn-ghost
+      opacity-70
+      hover:opacity-100
+      gap-1
+    "
+  >
+    {copied ? "Copied !" : <FiCopy size={16} />}
+  </button>
+
+
+  {/* READ-ONLY EDITOR */}
+  <div
+    ref={editorRef}
+    contentEditable={false}
+    spellCheck={false}
+    className="
+      min-h-35
+      p-4
+      border
+      rounded-md
+      font-mono
+      whitespace-pre-wrap
+      leading-8
+      w-full
+      max-w-5xl
+      bg-base-100
+      cursor-default
+      select-text
+    "
+  />
+</div>
+
 
       {/* VARIABLES */}
       <div className="space-y-3">
         {Object.entries(variables).map(([id, obj]) => (
           <div key={id}>
-            <label className="text-sm font-medium">
-              {obj.label}
-            </label>
+            <label className="text-sm font-medium">{obj.label}</label>
             <textarea
               className="w-full p-2 border rounded-md font-mono"
               rows={2}
               value={obj.value}
-              onChange={(e) => updateVariable(id, e.target.value)}
+              onChange={e => updateVariable(id, e.target.value)}
             />
           </div>
         ))}
@@ -255,7 +267,6 @@ export default function Prompt_area() {
           copyAndOpen={copyAndOpen}
         />
       </div>
-
     </div>
   )
 }

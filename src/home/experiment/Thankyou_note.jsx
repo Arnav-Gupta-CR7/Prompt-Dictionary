@@ -1,6 +1,6 @@
+import Card from "./Thankyou_printer";
 
-
-export default function Home_login_exp() {
+export default function Thankyou_note() {
   return (
     <>
       {/* Open modal */}
@@ -11,22 +11,17 @@ export default function Home_login_exp() {
       <input type="checkbox" id="my_modal_7" className="modal-toggle" />
 
       <div className="modal" role="dialog">
-        <div className="modal-box space-y-4">
-          <h2 className="text-xl font-semibold">Prompt Dictionary ♡</h2>
-
-          <p className="text-sm text-base-content/80">
-            <span className="font-semibold text-primary">Prompt Dictionary</span> is a
-            thoughtfully crafted collection of prompts designed to spark creativity,
-            improve productivity, and make working with AI more intuitive and fun.
-          </p>
-
-          <p className="text-sm text-base-content/80">
-            This project is made with{" "}
-            <span className="font-semibold text-error">love</span>, curiosity, and a lot
-            of late-night thinking by{" "}
-            <span className="font-semibold text-secondary">Arnav Gupta</span>.
-          </p>
+        <div className="modal-box h-96  space-y-4">
+          
+        <div className="flex mt-10 justify-center">
+          <Card/>
         </div>
+        <h2 className="text-xl font-semibold">Prompt Dictionary ♡</h2>
+          <p className="text-sm text-gray-500">
+            Prompts you love, organized for when you need them most.
+          </p>
+
+      </div>
 
         <label className="modal-backdrop" htmlFor="my_modal_7">
           Close

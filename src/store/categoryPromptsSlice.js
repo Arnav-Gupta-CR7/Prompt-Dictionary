@@ -1,14 +1,17 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
 import { supabase } from "../lib/supabase"
+import { addManyPrompts } from "./promptsSlice"
 
 const MAX_CATEGORIES = 5
 
+/* ---------- Thunk ---------- */
+
 export const fetchCategoryPromptsBySlug = createAsyncThunk(
   "categoryPrompts/fetchBySlug",
-  async (cat_slug, { rejectWithValue }) => {
+  async (cat_slug, { dispatch, rejectWithValue }) => {
     const { data, error } = await supabase.rpc(
       "get_prompts_by_category",
-      { cat_slug } // ✅ MATCHES SQL PARAM NAME
+      { cat_slug }
     )
 
     if (error) {
@@ -16,20 +19,24 @@ export const fetchCategoryPromptsBySlug = createAsyncThunk(
       return rejectWithValue(error.message)
     }
 
+    // 🔥 Normalize into promptsSlice
+    dispatch(addManyPrompts(data))
+
     return {
       slug: cat_slug,
-      prompts: data
+      promptIds: data.map(p => p.id)
     }
   }
 )
 
+/* ---------- Slice ---------- */
 
 const categoryPromptsSlice = createSlice({
   name: "categoryPrompts",
   initialState: {
-    promptsBySlug: {},
+    promptIdsBySlug: {},
     statusBySlug: {},
-    slugOrder: [], // LRU → MRU
+    slugOrder: [],
     error: null
   },
   reducers: {},
@@ -40,20 +47,18 @@ const categoryPromptsSlice = createSlice({
       })
 
       .addCase(fetchCategoryPromptsBySlug.fulfilled, (state, action) => {
-        const { slug, prompts } = action.payload
+        const { slug, promptIds } = action.payload
 
-        // save data
-        state.promptsBySlug[slug] = prompts
+        state.promptIdsBySlug[slug] = promptIds
         state.statusBySlug[slug] = "succeeded"
 
-        // update LRU order
+        // LRU handling
         state.slugOrder = state.slugOrder.filter(s => s !== slug)
         state.slugOrder.push(slug)
 
-        // evict oldest
         if (state.slugOrder.length > MAX_CATEGORIES) {
           const oldest = state.slugOrder.shift()
-          delete state.promptsBySlug[oldest]
+          delete state.promptIdsBySlug[oldest]
           delete state.statusBySlug[oldest]
         }
       })

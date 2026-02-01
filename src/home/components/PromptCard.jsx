@@ -11,8 +11,8 @@ const PROMPT_TYPE_MAP = {
   text_prompt: {
     label: "Text",
     icon: FaPenNib,
-    bg: "bg-base-100",
-    hoverBg: "hover:bg-base-200",
+    bg: "bg-base-200",
+    hoverBg: "hover:bg-base-300",
     badge: "badge-info"
   },
   image_prompt: {

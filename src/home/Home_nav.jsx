@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"
-import Home_login_exp from "./experiment/Home_login_exp";
+import { useNavigate, Link } from "react-router-dom"
+import Thankyou_note from "./experiment/Thankyou_note";
 import Sidebar_items from "./Sidebar_items";
 import { supabase } from "../lib/supabase"; // adjust path if needed
 
@@ -75,7 +75,8 @@ export default function Home_nav() {
 
 
             <div className="flex mx-5">
-                <a className=" text-xl">PromptDictionary.in</a>
+                <Link className=" text-xl" to="/">PromptDictionary.in</Link>
+                <span className="text-xs">beta</span>
             </div>
 
 
@@ -155,7 +156,7 @@ export default function Home_nav() {
             <div className="w-full">
                 <div className="justify-self-end flex items-center gap-5">
                 <div>
-                    <Home_login_exp/>
+                    <Thankyou_note/>
                 </div>
 
 
