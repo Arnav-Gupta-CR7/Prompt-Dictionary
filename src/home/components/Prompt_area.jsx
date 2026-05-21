@@ -62,6 +62,7 @@ export default function Prompt_area() {
   /* ================= EXTRACT VARIABLES ================= */
   const extractVariables = (text) => {
     const matches = [...text.matchAll(/<<([\s\S]*?)>>/g)];
+
     const next = {};
 
     matches.forEach((m, i) => {
@@ -81,7 +82,9 @@ export default function Prompt_area() {
     const content = prompt.content || "";
 
     rawTextRef.current = content;
+
     extractVariables(content);
+
     renderText(content);
   }, [prompt]);
 
@@ -94,27 +97,18 @@ export default function Prompt_area() {
       };
 
       let i = 0;
+
       const updatedText = rawTextRef.current.replace(
         /<<([\s\S]*?)>>/g,
         () => `<<${updated[`var_${i++}`].value}>>`,
       );
 
       rawTextRef.current = updatedText;
+
       renderText(updatedText);
 
       return updated;
     });
-  };
-
-  /* ================= EDITOR INPUT ================= */
-  const handleEditorInput = () => {
-    const text = editorRef.current.innerText
-      .replace(/\r\n/g, "\n")
-      .replace(/\n{3,}/g, "\n\n");
-
-    rawTextRef.current = text;
-    extractVariables(text);
-    renderText(text);
   };
 
   /* ================= SEND ================= */
@@ -122,12 +116,14 @@ export default function Prompt_area() {
     const url = `https://perplexity.ai/?q=${encodeURIComponent(
       rawTextRef.current,
     )}`;
+
     window.open(url, "_blank");
   };
 
   /* ================= COPY & OPEN ================= */
   const copyAndOpen = async (platform) => {
     const text = rawTextRef.current;
+
     if (!text) return;
 
     const urls = {
@@ -141,75 +137,84 @@ export default function Prompt_area() {
     };
 
     try {
-      // 1️⃣ COPY (with mobile fallback)
       if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(text);
       } else {
         const textArea = document.createElement("textarea");
+
         textArea.value = text;
         textArea.style.position = "fixed";
         textArea.style.top = "-9999px";
+
         document.body.appendChild(textArea);
+
         textArea.focus();
         textArea.select();
+
         document.execCommand("copy");
+
         document.body.removeChild(textArea);
       }
 
-      // 2️⃣ OPEN immediately (still in user gesture)
       const url = urls[platform];
+
       if (url) {
         window.open(url, "_blank", "noopener,noreferrer");
       }
     } catch (err) {
       console.error("Copy & open failed:", err);
+
+      alert("Tap and hold to copy manually");
+    }
+  };
+
+  /* ================= COPY BUTTON ================= */
+  const copyPrompt = async () => {
+    const text = rawTextRef.current;
+
+    if (!text) return;
+
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const textArea = document.createElement("textarea");
+
+        textArea.value = text;
+
+        textArea.style.position = "fixed";
+        textArea.style.top = "-9999px";
+        textArea.style.left = "-9999px";
+
+        document.body.appendChild(textArea);
+
+        textArea.focus();
+        textArea.select();
+
+        document.execCommand("copy");
+
+        document.body.removeChild(textArea);
+      }
+
+      setCopied(true);
+
+      setTimeout(() => setCopied(false), 1500);
+    } catch (err) {
+      console.error("Copy failed:", err);
+
       alert("Tap and hold to copy manually");
     }
   };
 
   /* ================= LOADING ================= */
   if (!prompt) {
+    console.log("PROMPT DATA:", prompt);
     return (
       <div className="flex justify-center mt-10">
         <Skeleton />
       </div>
     );
   }
-
-  /* ================= COPY BUTTON ================= */
-  const copyPrompt = async () => {
-    const text = rawTextRef.current;
-    if (!text) return;
-
-    try {
-      // Modern browsers (desktop + some mobile)
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(text);
-      } else {
-        // Fallback for mobile (iOS Safari)
-        const textArea = document.createElement("textarea");
-        textArea.value = text;
-
-        // Prevent scrolling on iOS
-        textArea.style.position = "fixed";
-        textArea.style.top = "-9999px";
-        textArea.style.left = "-9999px";
-
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-
-        document.execCommand("copy");
-        document.body.removeChild(textArea);
-      }
-
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    } catch (err) {
-      console.error("Copy failed:", err);
-      alert("Tap and hold to copy manually");
-    }
-  };
 
   /* ================= UI ================= */
   return (
@@ -236,26 +241,52 @@ export default function Prompt_area() {
         {prompt.description}
       </p>
 
+      {/* IMAGE */}
+      {prompt.image_url && (
+        <div
+          className="
+      overflow-hidden
+      rounded-2xl
+      border
+      bg-base-200
+      flex
+      justify-center
+      items-center
+      p-2
+    "
+        >
+          <img
+            src={prompt.image_url}
+            alt={prompt.title}
+            className="
+        w-auto
+        max-w-full
+        max-h-[650px]
+        object-contain
+        rounded-xl
+      "
+          />
+        </div>
+      )}
+
       {/* EDITOR */}
       <div className="relative">
         {/* COPY BUTTON */}
         <button
           onClick={copyPrompt}
           className="
-          absolute
-          top-1
-          right-1
-          md:top-1
-          md:right-1
-          btn
-          btn-xs
-          sm:btn-sm
-          btn-ghost
-          opacity-70
-          hover:opacity-100
-          gap-1
-          z-10
-        "
+            absolute
+            top-1
+            right-1
+            btn
+            btn-xs
+            sm:btn-sm
+            btn-ghost
+            opacity-70
+            hover:opacity-100
+            gap-1
+            z-10
+          "
         >
           {copied ? "Copied!" : <FiCopy size={14} />}
         </button>
@@ -266,20 +297,20 @@ export default function Prompt_area() {
           contentEditable={false}
           spellCheck={false}
           className="
-          min-h-25 
-          px-2 sm:px-5 md:px-6
-          py-5 sm:py-5 md:py-6
-          border
-          rounded-lg
-          font-mono
-          whitespace-pre-wrap
-          leading-6 sm:leading-7 md:leading-8
-          text-xs sm:text-sm md:text-base
-          w-full
-          bg-base-100
-          cursor-default
-          select-text
-        "
+            min-h-25
+            px-2 sm:px-5 md:px-6
+            py-5 sm:py-5 md:py-6
+            border
+            rounded-lg
+            font-mono
+            whitespace-pre-wrap
+            leading-6 sm:leading-7 md:leading-8
+            text-xs sm:text-sm md:text-base
+            w-full
+            bg-base-100
+            cursor-default
+            select-text
+          "
         />
       </div>
 
@@ -293,14 +324,14 @@ export default function Prompt_area() {
 
             <textarea
               className="
-              w-full
-              p-3 sm:p-3 md:p-4
-              border
-              rounded-md
-              font-mono
-              text-xs sm:text-sm md:text-base
-              resize-none
-            "
+                w-full
+                p-3 sm:p-3 md:p-4
+                border
+                rounded-md
+                font-mono
+                text-xs sm:text-sm md:text-base
+                resize-none
+              "
               rows={1}
               value={obj.value}
               onChange={(e) => updateVariable(id, e.target.value)}
