@@ -4,6 +4,8 @@ import Thankyou_note from "./experiment/Thankyou_note";
 import Sidebar_items from "./Sidebar_items";
 import { supabase } from "../lib/supabase";
 
+import { LuSparkles } from "react-icons/lu";
+
 export default function Home_nav() {
   const [isForest, setIsForest] = useState(false);
   const [query, setQuery] = useState("");
@@ -82,7 +84,7 @@ export default function Home_nav() {
       </div>
 
       {/* CENTER: Search (shrinks on phone) */}
-      <div className="relative ml-4 flex-1 min-w-32 sm:min-w-48 md:min-w-104">
+      <div className="relative ml-4 flex-1 min-w-32 sm:min-w-48 lg:min-w-104">
         <label className="input input-bordered input-sm flex items-center gap-2 w-full">
           <svg
             className="h-[1em] opacity-50"
@@ -166,6 +168,62 @@ export default function Home_nav() {
       {/* RIGHT: Actions */}
       <div className="w-full flex justify-end">
         <div className="flex-none flex items-center gap-x-3 sm:gap-6">
+          {/* AI CHAT BUTTON */}
+          <Link
+            to="/ai-chat"
+            className="
+    group
+    relative
+    overflow-hidden
+    btn
+    btn-ghost
+    min-h-0
+    h-8 sm:h-9
+    border
+    border-base-300
+    rounded-lg
+    px-2 sm:px-3
+    text-xs
+    text-base-content
+    transition-all
+    duration-300
+    hover:border-transparent
+  "
+          >
+            {/* Animated Gradient */}
+            <span
+              className="
+      absolute
+      inset-0
+      opacity-0
+      group-hover:opacity-100
+      transition-opacity
+      duration-500
+      bg-[linear-gradient(120deg,#7c3aed,#06b6d4,#ec4899,#8b5cf6)]
+      bg-[length:300%_300%]
+      animate-[gradientMove_4s_ease_infinite]
+      blur-md
+    "
+            ></span>
+
+            {/* Button Content */}
+            <span
+              className="
+      relative
+      z-10
+      font-medium
+      flex
+      items-center
+      gap-1
+      leading-none
+    "
+            >
+              <LuSparkles className="text-[10px] sm:text-xs" />
+
+              <span className="hidden sm:inline text-xs">AI Assistant</span>
+            </span>
+          </Link>
+
           {/* hide thank you on very small screens */}
           <div className="md:block">
             <Thankyou_note />

@@ -1,26 +1,25 @@
 @import "tailwindcss";
 @plugin "daisyui" {
-  themes: light --default, dark --prefersdark, cupcake,forest;
+  themes:
+    light --default,
+    dark --prefersdark,
+    cupcake,
+    forest;
 }
 
-
 [data-theme="cupcake"] {
-  --hl-fg: 285 55% 32%;   /* berry-purple text */
+  --hl-fg: 285 55% 32%; /* berry-purple text */
   --hl-bg: 330 100% 96%; /* light pink frosting */
 }
 
-
-
 [data-theme="forest"] {
-  --hl-fg: 140 35% 78%;  /* soft mint-green text */
-  --hl-bg: 155 30% 18%;  /* deep forest green */
+  --hl-fg: 140 35% 78%; /* soft mint-green text */
+  --hl-bg: 155 30% 18%; /* deep forest green */
 }
-
-
 
 [data-theme="forest"] .btn-light {
   background-color: hsl(140 40% 92%); /* soft mint */
-  color: hsl(160 30% 18%);            /* forest green text/icon */
+  color: hsl(160 30% 18%); /* forest green text/icon */
   border: 1px solid hsl(140 30% 80%);
 }
 
@@ -28,8 +27,16 @@
   background-color: hsl(140 40% 88%);
 }
 
+@keyframes gradientMove {
+  0% {
+    background-position: 0% 50%;
+  }
 
+  50% {
+    background-position: 100% 50%;
+  }
 
-
-
-
+  100% {
+    background-position: 0% 50%;
+  }
+}

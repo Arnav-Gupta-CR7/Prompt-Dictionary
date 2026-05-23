@@ -6,6 +6,11 @@ import { fetchPromptById } from "../../store/promptsSlice";
 import PromptActions from "./PromptActions";
 import { FiCopy } from "react-icons/fi";
 import Skeleton from "../Skeleton";
+import { Link } from "react-router-dom";
+
+import { FaArrowLeft } from "react-icons/fa6";
+import TiltImage from "./TiltImage";
+import AIChatBox from "../components/AI/AIChatBox";
 
 const PROMPT_TYPE_BADGE = {
   text_prompt: { label: "Text Prompt", class: "badge-info" },
@@ -219,21 +224,32 @@ export default function Prompt_area() {
   /* ================= UI ================= */
   return (
     <div className="max-w-5xl mx-auto px-3 sm:px-4 md:px-6 py-4 space-y-6 md:space-y-7">
-      {/* TITLE + BADGE */}
-      <div className="flex items-start md:items-center gap-2 md:gap-3 flex-wrap">
-        <h2 className="text-lg sm:text-xl md:text-2xl font-semibold leading-snug md:leading-tight">
-          {prompt.title}
-        </h2>
+      {/* TITLE + BADGE + HOME BUTTON */}
+      <div className="flex items-start md:items-center justify-between gap-3 flex-wrap">
+        {/* LEFT */}
+        <div className="flex items-start md:items-center gap-2 md:gap-3 flex-wrap">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-semibold leading-snug md:leading-tight">
+            {prompt.title}
+          </h2>
 
-        {prompt.layout_key && (
-          <span
-            className={`badge badge-sm sm:badge-md ${
-              PROMPT_TYPE_BADGE[prompt.layout_key]?.class || "badge-ghost"
-            }`}
-          >
-            {PROMPT_TYPE_BADGE[prompt.layout_key]?.label || "Prompt"}
-          </span>
-        )}
+          {prompt.layout_key && (
+            <span
+              className={`badge badge-sm sm:badge-md ${
+                PROMPT_TYPE_BADGE[prompt.layout_key]?.class || "badge-ghost"
+              }`}
+            >
+              {PROMPT_TYPE_BADGE[prompt.layout_key]?.label || "Prompt"}
+            </span>
+          )}
+        </div>
+
+        {/* RIGHT */}
+        <Link
+          to="/"
+          className="hidden sm:flex btn btn-outline btn-sm items-center gap-2"
+        >
+          <FaArrowLeft className="text-sm" />
+        </Link>
       </div>
 
       {/* DESCRIPTION */}
@@ -243,29 +259,41 @@ export default function Prompt_area() {
 
       {/* IMAGE */}
       {prompt.image_url && (
-        <div
-          className="
-      overflow-hidden
-      rounded-2xl
-      border
-      bg-base-200
-      flex
-      justify-center
-      items-center
-      p-2
-    "
-        >
-          <img
-            src={prompt.image_url}
-            alt={prompt.title}
+        <div className="flex justify-center items-stretch gap-6 w-full">
+          {/* Image */}
+          <div className="flex-shrink-0">
+            <a
+              href={prompt.image_url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <TiltImage
+                src={prompt.image_url}
+                alt={prompt.title}
+                maxHeight="450px"
+              />
+            </a>
+          </div>
+
+          {/* Right Container - Only on desktop/tablet landscape */}
+          <div
             className="
-        w-auto
-        max-w-full
-        max-h-[650px]
-        object-contain
-        rounded-xl
+        hidden
+        lg:block
+        flex-1
+        border
+        border-base-content
+        rounded-2xl
+        bg-base-100
+        
+        min-h-0
+        max-h-[450px]
+        p-6
       "
-          />
+          >
+            {/* Your content here */}
+            <AIChatBox prompt={prompt} />
+          </div>
         </div>
       )}
 

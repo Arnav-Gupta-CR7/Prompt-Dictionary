@@ -1,24 +1,24 @@
-import Pbtn from "../experiment/perplex"
+import Pbtn from "../experiment/perplex";
 
 /* ---------- CONFIG BY PROMPT TYPE ---------- */
 const ACTIONS_BY_TYPE = {
   text_prompt: {
     showPerplex: true,
-    platforms: ["chatgpt", "gemini", "grok", "claude"]
+    platforms: ["chatgpt", "gemini", "grok", "claude"],
   },
   image_prompt: {
     showPerplex: false,
-    platforms: ["midjourney", "dalle", "chatgpt"]
+    platforms: ["midjourney", "dalle", "chatgpt", "gemini", "grok", "claude"],
   },
   music_prompt: {
     showPerplex: false,
-    platforms: ["suno", "chatgpt"]
+    platforms: ["suno", "chatgpt"],
   },
   video_prompt: {
     showPerplex: false,
-    platforms: ["chatgpt"]
-  }
-}
+    platforms: ["chatgpt"],
+  },
+};
 
 const PLATFORM_ICONS = {
   chatgpt: "/chatgpt.svg",
@@ -27,20 +27,14 @@ const PLATFORM_ICONS = {
   claude: "/claude.svg",
   midjourney: "/midjourney.svg",
   dalle: "/dalle.svg",
-  suno: "/suno.svg"
-}
+  suno: "/suno.svg",
+};
 
-export default function PromptActions({
-  promptType,
-  sendToAI,
-  copyAndOpen
-}) {
-  const config =
-    ACTIONS_BY_TYPE[promptType] || ACTIONS_BY_TYPE.text_prompt
+export default function PromptActions({ promptType, sendToAI, copyAndOpen }) {
+  const config = ACTIONS_BY_TYPE[promptType] || ACTIONS_BY_TYPE.text_prompt;
 
   return (
     <div className="flex justify-between items-center">
-
       {/* LEFT: Pbtn only */}
       <div>
         {config.showPerplex && (
@@ -57,7 +51,7 @@ export default function PromptActions({
         </div>
 
         <div className="flex gap-x-2 items-center">
-          {config.platforms.map(platform => (
+          {config.platforms.map((platform) => (
             <button
               key={platform}
               className="btn btn-sm"
@@ -72,7 +66,6 @@ export default function PromptActions({
           ))}
         </div>
       </div>
-
     </div>
-  )
+  );
 }
