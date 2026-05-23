@@ -28,7 +28,8 @@ const AIChatBox = ({ prompt = null }) => {
 
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_GROQ_API_KEY}`,
+            Authorization:
+              "Bearer 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",
           },
 
           body: JSON.stringify({
