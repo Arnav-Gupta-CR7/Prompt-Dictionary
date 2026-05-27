@@ -29,7 +29,7 @@ const AIChatBox = ({ prompt = null }) => {
           headers: {
             "Content-Type": "application/json",
             Authorization:
-              "Bearer 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",
+              "Bearer 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",
           },
 
           body: JSON.stringify({
